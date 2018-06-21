@@ -1,0 +1,108 @@
+SYSTEM Pneumatic_brake {
+%
+INTERFACE {
+/*Description of variables and constants*/
+  STATE {
+    REAL P [100,800];
+    BOOL u1_old, u2_old;
+        }
+
+  PARAMETER {
+    REAL Ts = 20e-3;
+    REAL R = 287;
+    REAL T = 293;
+    REAL A1 = 4.2e-6;
+    REAL A2 = 2.5e-6;
+    REAL k = 1.4;
+    REAL V = 1.15e-3;
+    /*Ps*A1*sqrt(R*T)/V*/
+    REAL K1 = 847.2590;
+    REAL Ps = 800;
+    REAL P0 = 100;
+    /*-A2*sqrt(R*T)/V*/
+    REAL K2 = -0.6304;
+    REAL alpha12 = 0.4245;
+    REAL alpha21 = -0.00016;
+    REAL alpha22 = 0.4031;
+   REAL alpha31 = -0.00083;
+    REAL alpha32 = 0.8051;
+    REAL alpha41 = -0.003;
+    REAL alpha42 = 2.4326;
+    REAL belta11 = 1.8;
+    REAL belta12 = -180;
+    REAL belta21 = 0.3381;
+    REAL belta22 = -19.1920;
+    REAL belta31 = 0.4382;
+      }
+  INPUT {
+    BOOL u1, u2;
+		}
+
+  OUTPUT {
+    BOOL u1_out, u2_out;
+            }
+    }
+
+IMPLEMENTATION {
+  AUX {
+    REAL z1,z2,z3,z4,z5,z6,z7,z8,z9,z;
+    BOOL delta1_1, delta1_2;
+    BOOL delta1_3, delta1_4;
+    BOOL delta2_0, delta2_1, delta2_2;
+    BOOL m1, m2;
+      }
+
+  AD { /* PWA linearization*/
+    delta1_1 = P<=422.4;
+    delta1_2 = P<=600;
+    delta1_3 = P<=750;
+    delta1_4 = P<=810;
+    delta2_0 = P>=100;
+    delta2_1 = P<=110;
+    delta2_2 = P<=189.3939;
+      }
+
+  LINEAR {
+    z = z1+z2+z3+z4+z5+z6+z7+z8+z9;
+         }
+  DA {
+   z1 = {IF u1 & ~u2 & delta2_0
+    & delta1_1 THEN K1*alpha12};
+    z2 = {IF u1 & ~u2 & ~delta1_1
+    & delta1_2 THEN K1*(alpha21*P+alpha22)};
+    z3 = {IF u1 & ~u2 & ~delta1_2
+    & delta1_3 THEN K1*(alpha31*P+alpha32)};
+    z4 = {IF u1 & ~u2 & ~delta1_3
+    & delta1_4 THEN K1*(alpha41*P+alpha42)};
+    z5 = {IF u1 &  u2  THEN 0};
+    z6 = {IF ~u1 & u2 & delta2_1
+    & delta2_2 THEN K2*(belta11*P+belta12)};
+    z7 = {IF ~u1 & u2 & ~delta2_2
+    & delta2_3 THEN K2*(belta21*P+belta22)};
+    z8 = {IF ~u1 & u2 & ~delta2_3
+    & delta1_4 THEN K2*(belta31*P)};
+    z9 = {IF ~u1 & ~u2  THEN 0};
+       }
+
+  CONTINUOUS {
+    P=P+Ts*(z);
+             }
+  AUTOMATA{
+    u1_old = u1;
+    u2_old = u2;
+          }
+  LOGIC{
+    m1 = (~u1 & u1_old) | (u1 & ~u1_old);
+    m2 = (~u2 & u2_old) | (u2 & ~u2_old);
+        }
+
+  OUTPUT{
+    u1_out = m1;
+    u2_out = m2;
+        }
+  MUST{
+    P >= P0;
+    P <= Ps;
+      }
+}
+}
