@@ -8,7 +8,7 @@ INTERFACE {
         }
 
   PARAMETER {
-    REAL Ts = 20e-3;
+    REAL Ts = 10e-3;
     REAL R = 287;
     REAL T = 293;
     REAL A1 = 4.2e-6;
