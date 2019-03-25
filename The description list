@@ -103,6 +103,7 @@ IMPLEMENTATION {
   MUST{
     P >= P0;
     P <= Ps;
+    ~(u1 & u2);
       }
 }
 }
