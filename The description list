@@ -17,8 +17,6 @@ INTERFACE {
       REAL V = 1.15e-3; 
       REAL Ps = 700; 
       REAL P0 = 100;
-      REAL K1 = k*A1*sqrt(R*T)/V; 
-      REAL K2 = -k*A2*sqrt(R*T)/V;
              }
 	INPUT { BOOL u1, u2;
 		}
@@ -26,7 +24,7 @@ INTERFACE {
 
 IMPLEMENTATION {
     AUX {
-         REAL z1,z2,z3,z4,z5,z6,z7,z8,z9,z;
+         REAL z1,z2,z3,z4,z5,z6,z7,z8,z9,z10;
          BOOL delta1_1, delta1_2, delta1_3;
          BOOL  delta2_1, delta2_2, delta2_3;
          }
@@ -41,7 +39,7 @@ IMPLEMENTATION {
         }
 
     LINEAR {
-             z = z1+z2+z3+z4+z5+z6+z7+z8+z9;
+             z10 = z1+z2+z3+z4+z5+z6+z7+z8+z9;
            }
     DA { 
          z1 = {IF u1 & ~u2 & delta1_1 THEN P+3.1470};
@@ -52,10 +50,10 @@ IMPLEMENTATION {
          z6 = {IF ~u1 & u2 & delta2_1 & ~delta2_2 THEN 0.9981*P+0.0481};
          z7 = {IF ~u1 & u2 & delta2_2 & ~delta2_3 THEN 0.9964*P+0.2072}; 
          z8 = {IF ~u1 & u2 &  delta2_3 THEN 0.9863*P+0.3493};
-         z9 = {IF ~u1 & ~u2               THEN 0};                     
+         z9 = {IF ~u1 & ~u2               THEN P};                     
        }  
             
-    CONTINUOUS {   P=z;
+    CONTINUOUS {   P=z10;
                 }
 
    MUST{
