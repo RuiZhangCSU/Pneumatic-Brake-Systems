@@ -1,65 +1,70 @@
 SYSTEM pneumatic_brake {
-       
-INTERFACE {
-/* Description of variables and constants */
-      
-    STATE {
-        REAL P [100,700];
-        }
+	       
+	INTERFACE {
+	/* Description of variables and constants */
+	      
+	    STATE {
+	        REAL P [100,700];
+	        }
+	
 
-    PARAMETER {
-      REAL Ts = 10e-3; 
-      REAL R = 287; 
-      REAL T = 293;
-      REAL A1 = 4.2e-6; 
-      REAL A2 = 2.5e-6; 
-      REAL k = 1.4; 
-      REAL V = 1.15e-3; 
-      REAL Ps = 700; 
-      REAL P0 = 100;
-             }
-	INPUT { BOOL u1, u2;
-		}
-    }
+	    PARAMETER {
+	      REAL Ts = 10e-3; 
+	      REAL R = 287; 
+	      REAL T = 293;
+	      REAL A1 = 4.2e-6; 
+	      REAL A2 = 2.5e-6; 
+	      REAL k = 1.4; 
+	      REAL V = 1.15e-3; 
+	      REAL Ps = 700; 
+	      REAL P0 = 100;
+	             }
+		INPUT { BOOL u1, u2;
+			}
+	    }
+	
 
-IMPLEMENTATION {
-    AUX {
-         REAL z1,z2,z3,z4,z5,z6,z7,z8,z9,z10;
-         BOOL delta1_1, delta1_2, delta1_3;
-         BOOL  delta2_1, delta2_2, delta2_3;
-         }
+	IMPLEMENTATION {
+	    AUX {
+	         REAL z1,z2,z3,z4,z5,z6,z7,z8,z9,z10;
+	         BOOL delta1_1, delta1_2, delta1_3;
+	         BOOL  delta2_1, delta2_2, delta2_3;
+	         }
+	
 
-    AD { /* PWA linearization*/
-         delta1_1 = P<=0.528*Ps;
-         delta1_2 = P<=0.737*Ps;
-         delta1_3 = P<=0.94*Ps;
-         delta2_1 = P<=P0/0.528;
-         delta2_2 = P<=P0/0.737;
-         delta2_3 = P<=P0/0.94;
-        }
+	    AD { /* PWA linearization*/
+	         delta1_1 = P<=0.528*Ps;
+	         delta1_2 = P<=0.737*Ps;
+	         delta1_3 = P<=0.94*Ps;
+	         delta2_1 = P<=P0/0.528;
+	         delta2_2 = P<=P0/0.737;
+	         delta2_3 = P<=P0/0.94;
+	        }
+	
 
-    LINEAR {
-             z10 = z1+z2+z3+z4+z5+z6+z7+z8+z9;
-           }
-    DA { 
-         z1 = {IF u1 & ~u2 & delta1_1 THEN P+3.1470};
-         z2 = {IF u1 & ~u2 & ~delta1_1 & delta1_2 THEN 0.9988*P+2.6557};
-         z3 = {IF u1 & ~u2 & ~delta1_2 & delta1_3 THEN 0.9939*P+3.2358}; 
-         z4 = {IF u1 & ~u2 & ~delta1_3 THEN 0.9780*P+1.9726};
-         z5 = {IF ~u1 & u2 & ~delta2_1 THEN 0.9972*P};
-         z6 = {IF ~u1 & u2 & delta2_1 & ~delta2_2 THEN 0.9981*P+0.0481};
-         z7 = {IF ~u1 & u2 & delta2_2 & ~delta2_3 THEN 0.9964*P+0.2072}; 
-         z8 = {IF ~u1 & u2 &  delta2_3 THEN 0.9863*P+0.3493};
-         z9 = {IF ~u1 & ~u2               THEN P};                     
-       }  
-            
-    CONTINUOUS {   P=z10;
-                }
+	    LINEAR {
+	             z10 = z1+z2+z3+z4+z5+z6+z7+z8+z9;
+	           }
+	    DA { 
+	         z1 = {IF u1 & ~u2 & delta1_1 THEN P+4.4059};
+	         z2 = {IF u1 & ~u2 & ~delta1_1 & delta1_2 THEN 0.9983*P+3.5465};
+	         z3 = {IF u1 & ~u2 & ~delta1_2 & delta1_3 THEN 0.9914*P+3.5461}; 
+	         z4 = {IF u1 & ~u2 & ~delta1_3 THEN 0.9693*P+1.1396};
+	         z5 = {IF ~u1 & u2 & ~delta2_1 THEN 0.9961*P};
+	         z6 = {IF ~u1 & u2 & delta2_1 & ~delta2_2 THEN 0.9974*P+0.0625};
+	         z7 = {IF ~u1 & u2 & delta2_2 & ~delta2_3 THEN 0.9949*P+0.2512}; 
+	         z8 = {IF ~u1 & u2 &  delta2_3 THEN 0.9808*P+0.2820};
+	         z9 = {IF ~u1 & ~u2               THEN P};                     
+	       }  
+	            
+	    CONTINUOUS {   P=z10;
+	                }
+	
 
-   MUST{
-        P >= P0;
-        P <= Ps;
-       ~(u1 & u2);
-       }
-}
-}
+	   MUST{
+	        P >= P0;
+	        P <= Ps;
+	       ~(u1 & u2);
+	       }
+	}
+	}
